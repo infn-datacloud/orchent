@@ -62,6 +62,7 @@ pipeline {
               nexusUrl: 'repo.cnaf.cloud.infn.it',
               version: '1.0.0',
               repository: 'orchent',
+              groupId: '',
               credentialsId: 'nexus-credentials',
               artifacts: [ 
                   [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: 'orchent_1.0.0_amd64.deb' ],
