@@ -48,13 +48,9 @@ pipeline {
                     createPackage('arm64')
                 
             }
-            post {
-               always {
-                 cleanWs()
-               }
-             }
         }
         stage('Upload to Nexus'){
+          agent any
           steps{
             nexusArtifactUploader(
               nexusVersion: 'nexus3',
@@ -71,6 +67,11 @@ pipeline {
             )
              
             }
+            post {
+               always {
+                 cleanWs()
+               }
+             }
           }
   }
 }
