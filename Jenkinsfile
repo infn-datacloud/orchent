@@ -15,7 +15,6 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                  label 'jenkinsworker00'
                   image 'golang:1.16.15'
                   reuseNode true
                 }
@@ -37,7 +36,6 @@ pipeline {
         stage('Package') {
             agent {
                 docker {
-                    label 'jenkinsworker00'
                     image 'marica/fpm:latest'
                     reuseNode true
                 }
