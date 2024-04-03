@@ -1,7 +1,5 @@
 # orchent
 
-![Build workflow](https://github.com/maricaantonacci/orchent/actions/workflows/main.yaml/badge.svg)
-
 The Orchestrator Command Line Client
 
 ## Build from source
