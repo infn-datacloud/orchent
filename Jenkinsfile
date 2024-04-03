@@ -56,7 +56,7 @@ pipeline {
         }
         stage('Upload to Nexus'){
           steps{
-            nexusArtifactUploader (
+            nexusArtifactUploader(
               nexusVersion: 'nexus3',
               protocol: 'https',
               nexusUrl: 'repo.cnaf.cloud.infn.it',
