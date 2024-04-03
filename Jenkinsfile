@@ -58,7 +58,7 @@ pipeline {
           steps{
             nexusArtifactUploader (
               nexusVersion: 'nexus3',
-              protocol: 'https'
+              protocol: 'https',
               nexusUrl: 'repo.cnaf.cloud.infn.it',
               version: '1.0.0',
               repository: 'orchent',
