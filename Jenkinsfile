@@ -54,5 +54,22 @@ pipeline {
                }
              }
         }
+        stage('Upload to Nexus'){
+          steps{
+            nexusArtifactUploader (
+              nexusVersion: 'nexus3',
+              protocol: 'https'
+              nexusUrl: 'repo.cnaf.cloud.infn.it',
+              version: '1.0.0',
+              repository: 'orchent',
+              credentialsId: 'nexus-credentials',
+              artifacts [ 
+                  [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: 'orchent_1.0.0_amd64.deb' ],
+                  [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: 'orchent_1.0.0_arm64.deb' ]
+              ]
+            )
+             
+            }
+          }
   }
 }
