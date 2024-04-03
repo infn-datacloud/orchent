@@ -10,7 +10,7 @@ Before compiling orchent, make sure to install [The Go Programming Language](htt
 
 ```
 # Building orchent
-git clone https://github.com/indigo-dc/orchent.git
+git clone https://github.com/indigo-paas/orchent.git
 cd orchent
 go build -o orchent orchent.go
 
