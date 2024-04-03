@@ -50,7 +50,9 @@ pipeline {
             }
         }
         stage('Upload to Nexus'){
-          agent any
+          agent {
+                node { label 'jenkinsworker00' }
+            }
           steps{
             nexusArtifactUploader(
               nexusVersion: 'nexus3',
