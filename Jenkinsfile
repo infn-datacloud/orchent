@@ -1,16 +1,28 @@
-def createPackage(String architecture) {
+def createPackage(String architecture, String version) {
     script {
         sh """
         mkdir -p build/usr/bin
         mv build/orchent-${architecture}-linux build/usr/bin/orchent
-        fpm -s dir -t deb -n orchent -v 1.0.0 -C build/ \\
-            -p orchent_1.0.0_${architecture}.deb .
+        fpm -s dir -t deb -n orchent -v ${version} -C build/ \\
+            -p orchent_${version}_${architecture}.deb .
         """
+    }
+}
+
+def getReleaseVersion(String tagName) {
+    if (tagName) {
+        return tagName.replaceAll(/^v/, '')
+    } else {
+        return null
     }
 }
 
 pipeline {
   agent none
+  environment {
+        // Set RELEASE_VERSION only if TAG_NAME is set
+        RELEASE_VERSION = getReleaseVersion(TAG_NAME)
+    }
   stages {
         stage('Build') {
             agent {
@@ -35,6 +47,7 @@ pipeline {
         }
         
         stage('Package') {
+            when { tag "v*"}
             agent {
                 docker {
                     label 'jenkinsworker00'
@@ -44,13 +57,12 @@ pipeline {
             }
             options { skipDefaultCheckout() }
             steps {
-                
-                    createPackage('amd64')
-                    createPackage('arm64')
-                
+                    createPackage('amd64', RELEASE_VERSION)
+                    createPackage('arm64', RELEASE_VERSION)
             }
         }
         stage('Upload to Nexus'){
+          when { tag "v*"}
           agent {
                 node { label 'jenkinsworker00' }
             }
@@ -60,13 +72,13 @@ pipeline {
               nexusVersion: 'nexus3',
               protocol: 'https',
               nexusUrl: 'repo.cloud.cnaf.infn.it',
-              version: '1.0.0',
+              version: RELEASE_VERSION,
               repository: 'orchent',
               groupId: '',
               credentialsId: 'nexus-credentials',
               artifacts: [ 
-                  [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: 'orchent_1.0.0_amd64.deb' ],
-                  [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: 'orchent_1.0.0_arm64.deb' ]
+                  [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.deb" ],
+                  [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.deb" ]
               ]
             )
              
