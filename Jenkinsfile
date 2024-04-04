@@ -41,6 +41,7 @@ pipeline {
                     image 'marica/fpm:latest'
                     reuseNode true
                 }
+                options { skipDefaultCheckout() }
             }
             steps {
                 
@@ -52,6 +53,7 @@ pipeline {
         stage('Upload to Nexus'){
           agent {
                 node { label 'jenkinsworker00' }
+                options { skipDefaultCheckout() }
             }
           steps{
             nexusArtifactUploader(
