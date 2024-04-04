@@ -1,201 +1,93 @@
-#!/usr/bin/groovy
+def createPackage(String architecture, String version) {
+    script {
+        sh """
+        mkdir -p build/usr/bin
+        mv build/orchent-${architecture}-linux build/usr/bin/orchent
+        fpm -s dir -t deb -n orchent -v ${version} -C build/ \\
+            -p orchent_${version}_${architecture}.deb .
+        """
+    }
+}
 
-@Library(['github.com/indigo-dc/jenkins-pipeline-library@1.3.5']) _
+def getReleaseVersion(String tagName) {
+    if (tagName) {
+        return tagName.replaceAll(/^v/, '')
+    } else {
+        return null
+    }
+}
 
 pipeline {
-    agent {
-        label 'go'
+  agent none
+  environment {
+        // Set RELEASE_VERSION only if TAG_NAME is set
+        RELEASE_VERSION = getReleaseVersion(TAG_NAME)
     }
-    
-    environment {
-        dockerhub_repo = "indigodatacloud/orchent"
-        dockerhub_image_id = ""
-    }
-
-    stages {
-        stage('Code fetching') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Style Analysis') {
-            steps {
-                sh '''
-                GOFMT="/usr/local/go/bin/gofmt -s"
-                bad_files=$(find . -name "*.go" | xargs $GOFMT -l)
-                if [[ -n "${bad_files}" ]]; then
-                    echo "!!! '$GOFMT' needs to be run on the following files: "
-                    echo "${bad_files}"
-                    exit 1
-                fi
-                '''            
-            }
-        }
-
-        /*
-        stage('Dependency check') {
+  stages {
+        stage('Build') {
             agent {
-                label 'docker-build'
-            }
-            steps {
-                    OWASPDependencyCheckRun("$WORKSPACE/orchent", project="orchent")
-            }
-            post {
-                always {
-                    OWASPDependencyCheckPublish()
-                    HTMLReport(
-                        "$WORKSPACE/orchent",
-                        'dependency-check-report.html',
-                        'OWASP Dependency Report')
-                    deleteDir()
+                docker {
+                  label 'jenkinsworker00'
+                  image 'golang:1.16.15'
+                  reuseNode true
                 }
             }
+            steps {
+                script {
+                  sh '''
+                  mkdir -p build
+                  export GOCACHE=$WORKSPACE/.cache/go-build
+                  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags ' -w -extldflags "-static"' -ldflags "-B 0x$(head -c20 /dev/urandom|od -An -tx1|tr -d ' \n')" -o build/orchent-amd64-linux orchent.go
+                  CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -ldflags ' -w -extldflags "-static"' -ldflags "-B 0x$(head -c20 /dev/urandom|od -An -tx1|tr -d ' \n')" -o build/orchent-arm64-linux orchent.go
+                  CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -ldflags '-w -extldflags "-static"' -o build/orchent-amd64-darwin orchent.go
+                  CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -a -ldflags '-w -extldflags "-static"' -o build/orchent-arm64-darwin orchent.go
+                  '''
+                }  
+            }
         }
-        */
         
-        stage('Metrics gathering') {
+        stage('Package') {
+            when { tag "v*"}
             agent {
-                label 'sloc'
+                docker {
+                    label 'jenkinsworker00'
+                    image 'marica/fpm:latest'
+                    reuseNode true
+                }
             }
+            options { skipDefaultCheckout() }
             steps {
-                SLOCRun()
+                    createPackage('amd64', RELEASE_VERSION)
+                    createPackage('arm64', RELEASE_VERSION)
+            }
+        }
+        stage('Upload to Nexus'){
+          when { tag "v*"}
+          agent {
+                node { label 'jenkinsworker00' }
+            }
+          options { skipDefaultCheckout() }
+          steps{
+            nexusArtifactUploader(
+              nexusVersion: 'nexus3',
+              protocol: 'https',
+              nexusUrl: 'repo.cloud.cnaf.infn.it',
+              version: RELEASE_VERSION,
+              repository: 'orchent',
+              groupId: '',
+              credentialsId: 'nexus-credentials',
+              artifacts: [ 
+                  [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.deb" ],
+                  [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.deb" ]
+              ]
+            )
+             
             }
             post {
-                success {
-                    SLOCPublish()
-                }
-            }
-        }
-
-        stage('DockerHub delivery') {
-            when {
-                anyOf {
-                    branch 'master'
-                    buildingTag()
-                }
-            }
-            agent {
-                label 'docker-build'
-            }
-            steps {
-                checkout scm
-                dir("$WORKSPACE/utils") {
-                    sh 'echo "echo \\$ORCHENT_VERSION > /tmp/orchent_version" >> build_docker.sh'
-                    sh "./build_docker.sh ${env.dockerhub_repo}"
-                    script {
-                        def orchent_version = readFile('/tmp/orchent_version').trim()
-                        dockerhub_image_id = "${dockerhub_repo}:${orchent_version}"
-                    }
-                    sh 'rm -f /tmp/orchent_version'
-                }
-            }
-            post {
-                success {
-                    echo "Pushing Docker image ${dockerhub_image_id}.."
-                    DockerPush(dockerhub_image_id)
-                }
-                failure {
-                    echo 'Docker image building failed, removing dangling images..'
-                    DockerClean()
-                }
-                always {
-                    cleanWs()
-                }
-            }
-        }
-
-//        stage('Build RPM/DEB packages') {
-//            when {
-//                anyOf {
-//                    buildingTag()
-//                }
-//            } 
-//            parallel {
-//                stage('Build on Ubuntu16.04') {
-//                    agent {
-//                        label 'bubuntu16'
-//                    }
-//                    steps {
-//                        checkout scm
-//                        sh ''' 
-//                            echo 'Within build on Ubuntu16.04'
-//                            ./utils/build-pkg.sh
-//                            mkdir -p UBUNTU
-//                            BUILD_PATH="../orchent_build_env/"
-//                            echo $BUILD_PATH
-//                            find "$BUILD_PATH" -type f -name "orchent*.deb" -exec cp -v -t UBUNTU \'{}\' \';\' 
-//                        '''            
-//                    }
-//                    post {
-//                        success {
-//                            archiveArtifacts artifacts: '**/UBUNTU/*.deb'                        }
-//                    }
-//                }
-//                stage('Build on CentOS7') {
-//                    agent {
-//                        label 'bcentos7'
-//                    }
-//                    steps {
-//                        checkout scm
-//                        sh '''
-//                            echo 'Within build on CentOS7'
-//                            ./utils/build-pkg.sh
-//                            mkdir -p RPMS
-//                            BUILD_PATH="../orchent_build_env/"
-//                            find "$BUILD_PATH" -type f -name "orchent*.rpm" -exec cp -v -t RPMS \'{}\' \';\'
-//                        '''
-//                    }
-//                    post {
-//                        success {
-//                            archiveArtifacts artifacts: '**/RPMS/*.rpm'
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
-        stage('Notifications') {
-            when {
-                buildingTag()
-            }
-            parallel {
-                stage('Notify DEEP') {
-                    steps {
-                        JiraIssueNotification(
-                            'DEEP',
-                            'DPM',
-                            '10204',
-                            "[preview-testbed] New orchent version ${env.BRANCH_NAME} available",
-                            "Check new artifacts at:\n\t- Docker image: [${dockerhub_image_id}|https://hub.docker.com/r/${dockerhub_repo}/tags/]\n\t- RPMs/DEBs: ${env.BUILD_URL}",
-                            ['wp3', 'preview-testbed', "orchent-${env.BRANCH_NAME}"],
-                            'Task',
-                            'mariojmdavid',
-                            ['wgcastell',
-                             'vkozlov',
-                             'dlugo',
-                             'keiichiito',
-                             'laralloret',
-                             'ignacioheredia']
-                        )
-                    }
-                }
-                stage('Notify XDC') {
-                    steps {
-                        JiraIssueNotification(
-                            'XDC',
-                            'XDM',
-                            '10100',
-                            "[preview-testbed] New orchent version ${env.BRANCH_NAME} available",
-                            "Check new artifacts at:\n\t- Docker image: [${dockerhub_image_id}|https://hub.docker.com/r/${dockerhub_repo}/tags/]\n\t- RPMs/DEBs: ${env.BUILD_URL}",
-                            ['WP3', 't3.2', 'preview-testbed', "orchent-${env.BRANCH_NAME}"],
-                            'Task',
-                            'doinacristinaduma',
-                            ['doinacristinaduma']
-                        )
-                    }
-                }
-            }
-        }
-    }
+               always {
+                 cleanWs()
+               }
+             }
+          }
+  }
 }
