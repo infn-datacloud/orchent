@@ -80,7 +80,9 @@ pipeline {
               credentialsId: 'nexus-credentials',
               artifacts: [ 
                   [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.deb" ],
-                  [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.deb" ]
+                  [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.deb" ],
+                  [ artifactId: 'orchent-amd64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.rpm" ],
+                  [ artifactId: 'orchent-arm64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.rpm" ]
               ]
             )
              
