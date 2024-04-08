@@ -1,10 +1,12 @@
-def createPackage(String architecture, String version) {
+def createPackages(String architecture, String version) {
     script {
         sh """
         mkdir -p build/usr/bin
         mv build/orchent-${architecture}-linux build/usr/bin/orchent
         fpm -s dir -t deb -n orchent -v ${version} -C build/ \\
             -p orchent_${version}_${architecture}.deb .
+        fpm -s dir -t rpm -n orchent -v ${version} -C build/ \\
+            -p orchent_${version}_${architecture}.rpm .    
         """
     }
 }
@@ -57,8 +59,8 @@ pipeline {
             }
             options { skipDefaultCheckout() }
             steps {
-                    createPackage('amd64', RELEASE_VERSION)
-                    createPackage('arm64', RELEASE_VERSION)
+                    createPackages('amd64', RELEASE_VERSION)
+                    createPackages('arm64', RELEASE_VERSION)
             }
         }
         stage('Upload to Nexus'){
