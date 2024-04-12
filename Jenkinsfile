@@ -3,9 +3,9 @@ def createPackages(String architecture, String version) {
         sh """
         mkdir -p build/usr/bin
         mv build/orchent-${architecture}-linux build/usr/bin/orchent
-        fpm -s dir -t deb -n orchent -v ${version} -C build/ \\
+        fpm -s dir -t deb -a ${architecture} -n orchent -v ${version} -C build/ \\
             -p orchent_${version}_${architecture}.deb .
-        fpm -s dir -t rpm -n orchent -v ${version} -C build/ \\
+        fpm -s dir -t rpm -a ${architecture} -n orchent -v ${version} -C build/ \\
             -p orchent_${version}_${architecture}.rpm .    
         """
     }
