@@ -1,11 +1,12 @@
 def createPackages(String architecture, String version) {
     script {
+        def fpmArchitecture = architecture == 'arm64' ? 'aarch64' : architecture
         sh """
         mkdir -p build/usr/bin
         mv build/orchent-${architecture}-linux build/usr/bin/orchent
-        fpm -s dir -t deb -a ${architecture} -n orchent -v ${version} -C build/ \\
+        fpm -s dir -t deb -a ${fpmArchitecture} -n orchent -v ${version} -C build/ \\
             -p orchent_${version}_${architecture}.deb .
-        fpm -s dir -t rpm -a ${architecture} -n orchent -v ${version} -C build/ \\
+        fpm -s dir -t rpm -a ${fpmArchitecture} -n orchent -v ${version} -C build/ \\
             -p orchent_${version}_${architecture}.rpm .    
         """
     }
