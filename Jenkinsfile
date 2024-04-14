@@ -85,8 +85,8 @@ pipeline {
                   [ artifactId: 'orchent-amd64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.rpm" ],
                   [ artifactId: 'orchent-arm64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.rpm" ],
                   [ artifactId: 'orchent-arm64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.rpm" ],
-                  [ artifactId: 'orchent-arm64', type: 'exe', classifier: '', file: "build/orchent-macos-arm64" ],
-                  [ artifactId: 'orchent-amd64', type: 'exe', classifier: '', file: "build/orchent-macos-amd64" ]
+                  [ artifactId: 'orchent-arm64', type: '', classifier: 'macos', file: "build/orchent-macos-arm64" ],
+                  [ artifactId: 'orchent-amd64', type: '', classifier: 'macos', file: "build/orchent-macos-amd64" ]
               ]
             )
              

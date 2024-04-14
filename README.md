@@ -1,7 +1,5 @@
 # orchent
 
-![Build workflow](https://github.com/maricaantonacci/orchent/actions/workflows/main.yaml/badge.svg)
-
 The Orchestrator Command Line Client
 
 ## Build from source
@@ -20,14 +18,14 @@ go build -o orchent orchent.go
 
 ## Install package on Linux
 
-Download the rpm/deb package from [here](releases) and install it:
+Download the rpm/deb package from [here](https://repo.cloud.cnaf.infn.it/#browse/browse:orchent) and install it:
 
 ````
 # Debian/Ubuntu:
-dpkg -i orchent_1.2.7-rc1_amd64.deb 
+dpkg -i orchent-amd64-1.3.0.deb
 
 # CentOS/Fedora
-rpm -i orchent-1.2.7-1.el7.x86_64.rpm
+rpm -i orchent-amd64-1.3.0.rpm
 ````
 Test the installation:
 
@@ -37,10 +35,10 @@ orchent --version
 
 ## Install orchent binary on MacOS
 
-Download the darwin package from [here](releases), rename it (optional) and add executable permissions:
+Download the darwin package from [here](https://repo.cloud.cnaf.infn.it/#browse/browse:orchent), rename it (optional) and add executable permissions:
 
 ````
-mv orchent-amd64-darwin orchent
+mv orchent-amd64-1.3.0-macos orchent
 chmod +x orchent
 ````
 Test it:
