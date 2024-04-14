@@ -42,8 +42,8 @@ pipeline {
                   export GOCACHE=$WORKSPACE/.cache/go-build
                   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags ' -w -extldflags "-static"' -ldflags "-B 0x$(head -c20 /dev/urandom|od -An -tx1|tr -d ' \n')" -o build/orchent-amd64-linux orchent.go
                   CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -ldflags ' -w -extldflags "-static"' -ldflags "-B 0x$(head -c20 /dev/urandom|od -An -tx1|tr -d ' \n')" -o build/orchent-arm64-linux orchent.go
-                  CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -ldflags '-w -extldflags "-static"' -o build/orchent-amd64-darwin orchent.go
-                  CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -a -ldflags '-w -extldflags "-static"' -o build/orchent-arm64-darwin orchent.go
+                  CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -ldflags '-w -extldflags "-static"' -o build/orchent-macos-amd64 orchent.go
+                  CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -a -ldflags '-w -extldflags "-static"' -o build/orchent-macos-arm64 orchent.go
                   '''
                 }  
             }
@@ -83,7 +83,10 @@ pipeline {
                   [ artifactId: 'orchent-amd64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.deb" ],
                   [ artifactId: 'orchent-arm64', type: 'deb', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.deb" ],
                   [ artifactId: 'orchent-amd64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_amd64.rpm" ],
-                  [ artifactId: 'orchent-arm64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.rpm" ]
+                  [ artifactId: 'orchent-arm64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.rpm" ],
+                  [ artifactId: 'orchent-arm64', type: 'rpm', classifier: '', file: "orchent_${RELEASE_VERSION}_arm64.rpm" ],
+                  [ artifactId: 'orchent-arm64', type: 'exe', classifier: '', file: "build/orchent-macos-arm64" ],
+                  [ artifactId: 'orchent-amd64', type: 'exe', classifier: '', file: "build/orchent-macos-amd64" ]
               ]
             )
              
