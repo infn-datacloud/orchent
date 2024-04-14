@@ -2,6 +2,8 @@
 
 The Orchestrator Command Line Client
 
+https://img.shields.io/github/v/release/infn-datacloud/orchent
+
 ## Build from source
 
 Before compiling orchent, make sure to install [The Go Programming Language](https://golang.org)
