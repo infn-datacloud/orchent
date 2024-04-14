@@ -2,7 +2,7 @@
 
 The Orchestrator Command Line Client
 
-https://img.shields.io/github/v/release/infn-datacloud/orchent
+![release](https://img.shields.io/github/v/release/infn-datacloud/orchent)
 
 ## Build from source
 
