@@ -106,6 +106,12 @@ Commands:
   resshow <deployment uuid> <resource uuid>
     show a specific resource of a given deployment
 
+	vmStart <deployment uuid> <resource uuid>
+    start the given virtual machine
+
+ 	vmStop <deployment uuid> <resource uuid>
+    stop the given virtual machine
+
   test
     test if the given url is pointing to an orchestrator, please use this to ensure there is no typo in the url.
 
