@@ -106,10 +106,10 @@ Commands:
   resshow <deployment uuid> <resource uuid>
     show a specific resource of a given deployment
 
-	vmStart <deployment uuid> <resource uuid>
+  vmStart <deployment uuid> <resource uuid>
     start the given virtual machine
 
- 	vmStop <deployment uuid> <resource uuid>
+  vmStop <deployment uuid> <resource uuid>
     stop the given virtual machine
 
   test
