@@ -77,11 +77,11 @@ var (
 	showResResUuid = showRes.Arg("resource uuid", "the uuid of the resource to show").Required().String()
 
 	vmStart        = app.Command("vmstart", "start the given virtual machine")
-	vmStartDepUuid = vmStart.Arg("deployment uuid", "the uuid of the deployment that owns the virtual machine to start").Required().String()
-	vmStartVmUuid  = vmStart.Arg("vm uuid", "the uuid of the virtual machine to start").Required().String()
+	vmStartDepUuid = vmStart.Arg("deployment uuid", "the uuid of the deployment").Required().String()
+	vmStartVmUuid  = vmStart.Arg("vm uuid", "the uuid of the compute resource, i.e. the virtual machine, to start").Required().String()
 	vmStop         = app.Command("vmstop", "stop the given virtual machine")
-	vmStopDepUuid  = vmStop.Arg("deployment uuid", "the uuid of the deployment that owns the virtual machine to stop").Required().String()
-	vmStopVmUuid   = vmStop.Arg("vm uuid", "the uuid of the virtual machine to stop").Required().String()
+	vmStopDepUuid  = vmStop.Arg("deployment uuid", "the uuid of the deployment").Required().String()
+	vmStopVmUuid   = vmStop.Arg("vm uuid", "the uuid of the compute resource, i.e. the virtual machine, to stop").Required().String()
 
 	testUrl   = app.Command("test", "test if the given url is pointing to an orchestrator, please use this to ensure there is no typo in the url.")
 	getConfig = app.Command("showconf", "list the endpoints used by the current orchestrator.")
