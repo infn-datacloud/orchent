@@ -67,7 +67,7 @@ pipeline {
         stage('Upload to Nexus'){
           when { tag "v*"}
           agent {
-                node { label 'jenkinsworker00' }
+                node { label 'jenkins-node-label-1' }
             }
           options { skipDefaultCheckout() }
           steps{
