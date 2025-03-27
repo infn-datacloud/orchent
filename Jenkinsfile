@@ -30,7 +30,7 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                  label 'jenkinsworker00'
+                  label 'jenkins-node-label-1'
                   image 'golang:1.16.15'
                   reuseNode true
                 }
