@@ -24,10 +24,10 @@ Download the rpm/deb package from [here](https://repo.cloud.cnaf.infn.it/#browse
 
 ````
 # Debian/Ubuntu:
-dpkg -i orchent-amd64-1.3.1.deb
+dpkg -i orchent-amd64-1.3.2.deb
 
 # CentOS/Fedora
-rpm -i orchent-amd64-1.3.1.rpm
+rpm -i orchent-amd64-1.3.2.rpm
 ````
 Test the installation:
 
@@ -40,7 +40,7 @@ orchent --version
 Download the darwin package from [here](https://repo.cloud.cnaf.infn.it/#browse/browse:orchent), rename it (optional) and add executable permissions:
 
 ````
-mv orchent-amd64-1.3.1-macos orchent
+mv orchent-amd64-1.3.2-macos orchent
 chmod +x orchent
 ````
 Test it:
