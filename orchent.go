@@ -27,11 +27,12 @@ var (
 	app     = kingpin.New("orchent", "The orchestrator client. \n \nPlease either store your access token in 'ORCHENT_TOKEN' or set the account to use with oidc-agent in the 'ORCHENT_AGENT_ACCOUNT' and the socket of the oidc-agent in the 'OIDC_SOCK' environment variable: \n export ORCHENT_TOKEN=<your access token> \n         OR \n export OIDC_SOCK=<path to the oidc-agent socket> (usually this is already exported) \n export ORCHENT_AGENT_ACCOUNT=<account to use> \nIf you need to specify the file containing the trusted root CAs use the 'ORCHENT_CAFILE' environment variable: \n export ORCHENT_CAFILE=<path to file containing trusted CAs>\n \n").Version(OrchentVersion)
 	hostUrl = app.Flag("url", "the base url of the orchestrator rest interface. Alternative the environment variable 'ORCHENT_URL' can be used: 'export ORCHENT_URL=<the_url>'").Short('u').String()
 
-	lsDep       = app.Command("depls", "list deployments")
-	lsDepUser   = lsDep.Flag("created_by", "the subject@issuer of user to filter the deployments for, 'me' is shorthand for the current user").Short('c').String()
-	lsDepGroup  = lsDep.Flag("user_group", "the user group to filter the deployments for").Short('g').String()
-	lsDepBefore = lsDep.Flag("before", "filter the deployments, they must be created before the given date/time, the format is YYYYMMDDHHMM").Short('b').String()
-	lsDepAfter  = lsDep.Flag("after", "filter the deployments, they must be created after the given date/time, the format is YYYYMMDDHHMM").Short('a').String()
+	lsDep               = app.Command("depls", "list deployments")
+	lsDepUser           = lsDep.Flag("created_by", "the subject@issuer of user to filter the deployments for, 'me' is shorthand for the current user").Short('c').String()
+	lsDepGroup          = lsDep.Flag("user_group", "the user group to filter the deployments for").Short('g').String()
+	lsDepExcludedStatus = lsDep.Flag("excludedstatus", "filter the deployments, the dployments in given status(s) are excluded from list").Short('x').String()
+	lsDepBefore         = lsDep.Flag("before", "filter the deployments, they must be created before the given date/time, the format is YYYYMMDDHHMM").Short('b').String()
+	lsDepAfter          = lsDep.Flag("after", "filter the deployments, they must be created after the given date/time, the format is YYYYMMDDHHMM").Short('a').String()
 
 	showDep        = app.Command("depshow", "show a specific deployment")
 	showDepUuid    = showDep.Arg("uuid", "the uuid of the deployment to display").Required().String()
@@ -383,7 +384,7 @@ func time_string_to_int(time string) int {
 	return value
 }
 
-func deployments_list(base *sling.Sling, user string, group string, before string, after string) {
+func deployments_list(base *sling.Sling, user string, group string, excludedstatus string, before string, after string) {
 	path := "./deployments"
 	query_params := []string{}
 	if user != "" {
@@ -391,6 +392,9 @@ func deployments_list(base *sling.Sling, user string, group string, before strin
 	}
 	if group != "" {
 		query_params = append(query_params, "userGroup="+group)
+	}
+	if excludedstatus != "" {
+		query_params = append(query_params, "excludedStatus="+excludedstatus)
 	}
 	if len(query_params) > 0 {
 		path += "?" + strings.Join(query_params[:], "&")
@@ -908,7 +912,7 @@ func main() {
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case lsDep.FullCommand():
-		deployments_list(base, *lsDepUser, *lsDepGroup, *lsDepBefore, *lsDepAfter)
+		deployments_list(base, *lsDepUser, *lsDepGroup, *lsDepExcludedStatus, *lsDepBefore, *lsDepAfter)
 
 	case showDep.FullCommand():
 		uuid := try_alias_uuid(*showDepUuid, aliases)
