@@ -53,7 +53,7 @@ pipeline {
             when { tag "v*"}
             agent {
                 docker {
-                    label 'jenkinsworker00'
+                    label 'jenkins-node-label-1'
                     image 'marica/fpm:latest'
                     reuseNode true
                 }
