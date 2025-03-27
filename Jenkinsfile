@@ -21,7 +21,9 @@ def getReleaseVersion(String tagName) {
 }
 
 pipeline {
-  agent none
+  agent {
+        label 'jenkins-node-label-1'
+    }
   environment {
         // Set RELEASE_VERSION only if TAG_NAME is set
         RELEASE_VERSION = getReleaseVersion(TAG_NAME)
@@ -30,7 +32,6 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                  label 'jenkins-node-label-1'
                   image 'golang:1.16.15'
                   reuseNode true
                 }
@@ -53,7 +54,6 @@ pipeline {
             when { tag "v*"}
             agent {
                 docker {
-                    label 'jenkins-node-label-1'
                     image 'marica/fpm:latest'
                     reuseNode true
                 }
@@ -66,9 +66,6 @@ pipeline {
         }
         stage('Upload to Nexus'){
           when { tag "v*"}
-          agent {
-                node { label 'jenkins-node-label-1' }
-            }
           options { skipDefaultCheckout() }
           steps{
             nexusArtifactUploader(
